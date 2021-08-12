@@ -10,10 +10,4 @@ const ProjectModel = {
 
 const ProjectSchema = new mongoose.Schema(ProjectModel); 
 
-const Project = mongoose.model('project', ProjectSchema);
-
-module.exports = [
-    Project,
-    ProjectSchema,
-    ProjectModel
-]
+exports.Project = mongoose.model('project', ProjectSchema);
