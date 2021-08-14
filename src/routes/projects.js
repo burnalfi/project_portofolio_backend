@@ -88,7 +88,8 @@ exports.updateOne = async function(req, res, next) {
             res.send(
                 500,
                 {
-                    message: error.message
+                    message: error.message,
+                    content: null
                 }
             )
             return next();

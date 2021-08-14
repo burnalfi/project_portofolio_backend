@@ -3,12 +3,7 @@ require('dotenv').config();
 const restify = require('restify');
 const mongoose = require('mongoose');
 
-const process = require('process');
-
-if (!process.env.DB_USER) {console.info("DB_USER can't be empty"); process.exit(1);}
-if (!process.env.DB_HOST) {console.info("DB_HOST can't be empty"); process.exit(1);}
-if (!process.env.DB_PORT) {console.info("DB_PORT can't be empty"); process.exit(1);}
-if (!process.env.DB_NAME) {console.info("DB_NAME can't be empty"); process.exit(1);}
+const CONFIG = require('./config');
 
 const server = restify.createServer({
     name: "Personal Project Portofolio"
@@ -17,24 +12,26 @@ const server = restify.createServer({
 console.log("SERVER CREATED!")
 
 mongoose.connect(
-    `${process.env.DB_USER}://${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`, 
+    `${CONFIG.DATABASE.DB_USER}://${CONFIG.DATABASE.DB_HOST}:${CONFIG.DATABASE.DB_PORT}/${CONFIG.DATABASE.DB_NAME}`, 
     {
         useNewUrlParser: true, useUnifiedTopology: true
     })
     .then(() => {
+        console.log("APP CONNECTED TO MONGODB!");
+
+        // ?
         server.on('InternalServer', function(req, res, error, callback) {
             return callback();
-        })
+        });
         server.on('restifyError', function(req, res, error, callback) {
             return callback();
-        })
+        });
 
-        console.log("APP CONNECTED TO MONGODB!")
-
+        // Middlewares
         server.use(restify.plugins.acceptParser(server.acceptable));
         server.use(restify.plugins.bodyParser({mapParams: true}));
 
-        
+        // Base Route
         server.get("/", function(_req, res, next) {
             res.send("Hello world!");
             next();
@@ -46,14 +43,18 @@ mongoose.connect(
         server.put("/projects/update/:target_id", require("./routes/projects").updateOne);
         server.del("/projects/delete/:target_id", require("./routes/projects").deleteById);
 
+        // Account Routes
+        server.post("/accounts/register", require("./routes/accounts").register);
+        server.post("/accounts/login", require("./routes/accounts").auth);
+
 
         server.listen(8080, function() {
             console.log("");
             console.log("+------------%s-----------+", server.name);
             console.log("|                                                  |");
-            console.log("|         Server Started Successfully!             |");
+            console.log("|           Server Started Successfully!           |");
             console.log("|                                                  |");
-            console.log("|        Listening At %s             |", server.url);
+            console.log("|          Listening At %s           |", server.url);
             console.log("|                                                  |");
             console.log("+--------------------------------------------------+");
             console.log("");
