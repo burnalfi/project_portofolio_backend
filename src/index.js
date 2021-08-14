@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const restify = require('restify');
 const mongoose = require('mongoose');
+const rjwt = require('restify-jwt-community');
 
 const CONFIG = require('./config');
 
@@ -30,6 +31,7 @@ mongoose.connect(
         // Middlewares
         server.use(restify.plugins.acceptParser(server.acceptable));
         server.use(restify.plugins.bodyParser({mapParams: true}));
+        // server.use(rjwt({ secret: CONFIG.SECRET_KEY })).unless({ path:['/projects/add', '/projects/update/:target_id', '/projects/delete/:target_id'] });
 
         // Base Route
         server.get("/", function(_req, res, next) {

@@ -85,17 +85,16 @@ exports.auth = async function (
             }
 
             const token = jwt.sign(accounts.toJSON(), CONFIG.SECRET_KEY, {
-                expiresIn: "5m",
-                algorithm: "RS256"
+                expiresIn: "5m"
             });
 
-            const { issuedAt, expiresIn } = jwt.decode(token);
-
+            const { iat, exp, createdAt } = jwt.decode(token);
             return {
                 data: {
                     token: token,
-                    issuedAt: issuedAt,
-                    expiresIn: expiresIn
+                    iat: iat,
+                    exp: exp,
+                    createdAt: createdAt
                 },
                 message: "Authetication Success!",
                 status: 200

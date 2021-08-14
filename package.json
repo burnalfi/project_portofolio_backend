@@ -26,6 +26,7 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.13.6",
     "nodemon": "^2.0.12",
-    "restify": "^8.5.1"
+    "restify": "^8.5.1",
+    "restify-jwt-community": "^1.1.16"
   }
 }

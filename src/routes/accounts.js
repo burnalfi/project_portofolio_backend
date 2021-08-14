@@ -36,7 +36,6 @@ exports.auth = async function(req, res, next) {
     )
     .then(
         async (accounts) => {
-            console.log(accounts);
             res.contentType = 'json';
             res.send(
                 accounts.status,
