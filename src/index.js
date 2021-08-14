@@ -1,20 +1,9 @@
 require('dotenv').config();
 
-// import dotenv from 'dotenv';
-// dotenv.config()
-
 const restify = require('restify');
 const mongoose = require('mongoose');
 
-const process = require('process')
-
-// import restify from 'restify';
-// import mongoose from 'mongoose';
-// import process from 'process';
-
-
-// import * as projectsRoutes from './routes/projects';
-// const projectsRoutes = require('./routes/projects');
+const process = require('process');
 
 if (!process.env.DB_USER) {console.info("DB_USER can't be empty"); process.exit(1);}
 if (!process.env.DB_HOST) {console.info("DB_HOST can't be empty"); process.exit(1);}
@@ -25,14 +14,24 @@ const server = restify.createServer({
     name: "Personal Project Portofolio"
 });
 
+console.log("SERVER CREATED!")
+
 mongoose.connect(
     `${process.env.DB_USER}://${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`, 
     {
         useNewUrlParser: true, useUnifiedTopology: true
     })
     .then(() => {
+        server.on('InternalServer', function(req, res, error, callback) {
+            return callback();
+        })
+        server.on('restifyError', function(req, res, error, callback) {
+            return callback();
+        })
+
+        console.log("APP CONNECTED TO MONGODB!")
+
         server.use(restify.plugins.acceptParser(server.acceptable));
-        server.use(restify.plugins.jsonBodyParser());
         server.use(restify.plugins.bodyParser({mapParams: true}));
 
         
@@ -41,16 +40,23 @@ mongoose.connect(
             next();
         })
 
-        // Project Routes
+        // Projects Routes
         server.get("/projects/get_all", require("./routes/projects").getAll);
         server.post("/projects/add", require("./routes/projects").add);
+        server.put("/projects/update/:target_id", require("./routes/projects").updateOne);
+        server.del("/projects/delete/:target_id", require("./routes/projects").deleteById);
+
 
         server.listen(8080, function() {
-            console.log("Server Started Successfully!");
-            console.log("%s Listening At %s ...", server.name, server.url);
+            console.log("");
+            console.log("+------------%s-----------+", server.name);
+            console.log("|                                                  |");
+            console.log("|         Server Started Successfully!             |");
+            console.log("|                                                  |");
+            console.log("|        Listening At %s             |", server.url);
+            console.log("|                                                  |");
+            console.log("+--------------------------------------------------+");
+            console.log("");
         })
     }
-).catch(e => {
-    console.log(e);
-    process.exit(1);
-})
+)

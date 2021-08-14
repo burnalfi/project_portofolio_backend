@@ -1,9 +1,9 @@
 const ProjectsController = require("../controllers/projects");
 
- exports.add = function(req, res, next) {
+ exports.add = async function(req, res, next) {
     try {
         console.info(req.body)
-        const projects = ProjectsController.add(
+        const projects = await ProjectsController.add(
             req.body.title,
             req.body.description,
             req.body.thumbnail_ids,
@@ -34,28 +34,97 @@ const ProjectsController = require("../controllers/projects");
     }
 }
 
-exports.getAll = function(_req, res, next) {
+exports.getAll = async function(_req, res, next) {
     try {
-        const projects = ProjectsController.getAll();
+        const projects = await ProjectsController.getAll();
+
+        res.contentType = 'json';
         res.send(
             projects.status,
-            JSON.stringify({
+            {
                 message: projects.message,
                 content: projects.data
-            })
+            }
         );
 
         return next();
     } catch (e) {
         console.log(e.message);
+        res.contentType = 'json';
             res.send(
             500,
-            JSON.stringify({
+            {
                 message: e.message,
                 content: null
-            })
+            }
         );
 
         return next();
     }
+}
+
+exports.updateOne = async function(req, res, next) {
+    await ProjectsController.updateOne(
+        req.params.target_id,
+        req.body.title,
+        req.body.description,
+        req.body.thumbnail_ids,
+        req.body.link
+    ).then(
+        async (projects) => {
+            res.contentType = 'json';
+            res.send(
+                projects.status,
+                {
+                    message: projects.message,
+                    content: projects.data
+                }
+            )
+            return next();
+        }
+    ).catch(
+        async (error) => {
+            res.contenType = 'json';
+            res.send(
+                500,
+                {
+                    message: error.message
+                }
+            )
+            return next();
+        }
+    )
+}
+
+exports.deleteById = async function(req, res, next) {
+    await ProjectsController
+    .deleteByID(req.params.target_id)
+    .then(
+        async (projects) => {
+            res.contentType = 'json';
+            res.send(
+                projects.status,
+                {
+                    message: projects.message,
+                    content: projects.data
+                }
+            )
+
+            return next();
+        }
+    )
+    .catch(
+        async (error) => {
+            res.contenType = 'json';
+            res.send(
+                500,
+                {
+                    message: error.message,
+                    content: null
+                }
+            )
+
+            return next();
+        }
+    )
 }
