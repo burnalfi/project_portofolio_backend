@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+const multer = require('multer');
 const restify = require('restify');
 const mongoose = require('mongoose');
 const rjwt = require('restify-jwt-community');
@@ -31,7 +32,20 @@ mongoose.connect(
         // Middlewares
         server.use(restify.plugins.acceptParser(server.acceptable));
         server.use(restify.plugins.bodyParser({mapParams: true}));
+        server.use(restify.plugins.urlEncodedBodyParser());
         // server.use(rjwt({ secret: CONFIG.SECRET_KEY })).unless({ path:['/projects/add', '/projects/update/:target_id', '/projects/delete/:target_id'] });
+
+        // Image Uploading Middlewares
+        const imageDirectory = multer.diskStorage({
+            destination: (req, file, cb) => {
+                cb(null, "uploads");
+            },
+            filename: (req, file, cb) => {
+                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+                cb(null, file.fieldname + '-' + uniqueSuffix);
+            }
+        });
+        const upload = multer({ storage: imageDirectory });
 
         // Base Route
         server.get("/", function(_req, res, next) {
@@ -49,6 +63,8 @@ mongoose.connect(
         server.post("/accounts/register", require("./routes/accounts").register);
         server.post("/accounts/login", require("./routes/accounts").auth);
 
+        // Thumbnail Routes
+        server.post("/thumbnail/upload", upload.single("thumbnail"), require("./routes/thumbnails").uploadImage);
 
         server.listen(8080, function() {
             console.log("");
