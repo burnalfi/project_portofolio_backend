@@ -36,7 +36,7 @@ mongoose.connect(
         // server.use(rjwt({ secret: CONFIG.SECRET_KEY })).unless({ path:['/projects/add', '/projects/update/:target_id', '/projects/delete/:target_id'] });
 
         // Image Uploading Middlewares
-        const imageDirectory = multer.diskStorage({
+        var storage = multer.diskStorage({
             destination: (req, file, cb) => {
                 cb(null, "uploads");
             },
@@ -45,7 +45,7 @@ mongoose.connect(
                 cb(null, file.fieldname + '-' + uniqueSuffix);
             }
         });
-        const upload = multer({ storage: imageDirectory });
+        var upload = multer({ storage: storage });
 
         // Base Route
         server.get("/", function(_req, res, next) {
@@ -65,6 +65,8 @@ mongoose.connect(
 
         // Thumbnail Routes
         server.post("/thumbnail/upload", upload.single("thumbnail"), require("./routes/thumbnails").uploadImage);
+        server.get("/thumbnail/get_all_metadata", require("./routes/thumbnails").getAll);
+        server.get("/thumbnail/get_thumbnail/file_id/:file_id", require("./routes/thumbnails").getThumbnail);
 
         server.listen(8080, function() {
             console.log("");
